@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mars Rover</title>
+  </head>
+<!-- css -->
+  <style>
+    body {
+      background-color: gray;
+      font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
+        "Lucida Sans", Arial, sans-serif;
+      margin: 13px;
+      padding: 10px;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    #container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 80%;
+    }
+    /* h1 {
+      font-weight:900;
+    } */
+
+    #container2 {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-evenly;
+      width: 100%;
+    }
+    #container3 {
+      margin-top: 20px;
+    }
+    #camera,
+    #sol,
+    #btn,
+    #date {
+      width: 70%;
+      margin: 10px;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+    }
+    #date {
+      width: 50%;
+    }
+
+    #btn {
+      width: 50%;
+      background-color: rgb(43, 169, 231);
+      color: white;
+      border: none;
+      border-radius: 6px;
+    }
+   
+    #btn:hover {
+      background-color: rgb(21, 99, 138);
+    }
+    input {
+      padding: 10px;
+    }
+    #container3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+    }
+    .card {
+      padding: 10px;
+      background-color: whitesmoke;
+      border-radius: 6px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+    transform: scale(1.05); 
+}
+    p {
+      padding: 15px;
+    }
+
+    .card img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    @media (max-width: 900px) {
+    #container3 {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    #container3 {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+}
+
+@media (max-width: 450px) {
+    #container3 {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+}
+  </style>
+
+  <body>
+    <!-- HTML -->
+    <div id="container">
+      <h1>Explore NASA's Mars Rover Photos</h1>
+
+      <div id="container2">
+        <!-- different available camera options -->
+        <select id="camera">
+          <option value="">Select camera</option>
+          <option value="FHAZ">FHAZ</option>
+          <option value="MINITES">MINITES</option>
+          <option value="CHEMCAM">CHEMCAM</option>
+          <option value="RHAZ">RHAZ</option>
+          <option value="MAST">MAST</option>
+
+          <option value="NAVCAM">NAVCAM</option>
+          <option value="PANCAM">PANCAM</option>
+
+          <option value="MAHLI">MAHLI</option>
+          <option value="MARDI">MARDI</option>
+        </select>
+
+        <select id="sol">
+          <option value="">SOL</option>
+          <!--  A dropdown menu with values 1000, 500, and 100 (Martian solar days) -->
+
+          <option value="1000">1000</option>
+          <option value="500">500</option>
+          <option value="100">100</option>
+        </select>
+
+        <input type="date" id="date" />
+        <button id="btn" onclick="fetchPhoto()">Fetch Photos</button>
+      </div>
+
+      <div id="container3">
+        <!-- <img src="${photo.img_src}" alt="Mars Rover Photo" >
+            <p>${photo.earth_date}</p> -->
+      </div>
+    </div>
+
+    <!-- JS -->
+    <script>
+      let apiKey = "Lo0JhRxbmWoZD1p52spF1V5rDQBChW7FETA9paQo";
+      let dateIn = document.getElementById("date");
+
+      let date2 = new Date();
+      date2.setDate(date2.getDate() - 1);
+      let dateSet = date2.toISOString().split("T")[0];
+      dateIn.value = dateSet;
+
+      // function to fetch and display photos when button is clicked
+      async function fetchPhoto() {
+        let camera = document.getElementById("camera").value;
+        let sol = document.getElementById("sol").value;
+        let date = dateIn.value;
+        let container3 = document.getElementById("container3");
+
+        let url = `https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?api_key=${apiKey}`;
+
+        if (camera) {
+          url += `&camera=${camera}`;
+        }
+
+        if (sol) {
+          url += `&sol=${sol}`;
+        }
+
+        if (date && !sol) {
+          url += `&earth_date=${date}`;
+        }
+
+        try {
+          let res = await fetch(url);
+          let data = await res.json();
+
+          container3.innerHTML = "";
+
+          if (data.photos && data.photos.length > 0) {
+            data.photos.forEach((photo) => {
+              let card = document.createElement("div");
+              card.className = "card";
+
+              card.innerHTML = `
+                        <img src="${photo.img_src}" alt="Mars Rover Photo">
+                        <p>${photo.earth_date}</p>
+                    `;
+
+              container3.appendChild(card);
+            });
+          } else {
+            container3.innerHTML = `<p>No images found.</p>`;
+          }
+        } catch (error) {
+          alert("Error Fetching the data. Try again later!");
+          console.error(error);
+        }
+      }
+    </script>
+  </body>
+</html>
